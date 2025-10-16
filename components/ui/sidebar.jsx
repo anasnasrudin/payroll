@@ -18,14 +18,20 @@ export default function Sidebar() {
   const router = useRouter()
   const [showLogoutCard, setShowLogoutCard] = useState(false)
   const [username, setUsername] = useState("")
-  const [role, setRole] = useState("user") // default role
+  const [role, setRole] = useState("")
 
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username") || ""
-    const storedRole = localStorage.getItem("role") || "user"
-    setUsername(storedUsername)
-    setRole(storedRole)
-  }, [])
+    // ambil data user dari localStorage
+    const storedUser = localStorage.getItem("user")
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser)
+      setUsername(parsedUser.username)
+      setRole(parsedUser.role)
+    } else {
+      // kalau belum login, langsung redirect ke halaman login
+      router.push("/pages/login")
+    }
+  }, [router])
 
   const menuItems = [
     { href: "/pages/dashboard", icon: faHome, label: "Dashboard" },
@@ -35,12 +41,14 @@ export default function Sidebar() {
   ]
 
   const handleLogoutClick = () => setShowLogoutCard(true)
+
   const confirmLogout = () => {
     localStorage.clear()
     sessionStorage.clear()
     setShowLogoutCard(false)
     router.push("/pages/login")
   }
+
   const cancelLogout = () => setShowLogoutCard(false)
 
   return (
@@ -63,9 +71,14 @@ export default function Sidebar() {
 
         <span className="h-[1.5px] bg-[#dfe0e4] w-full block my-3"></span>
 
-        {/* User Info */}
-        <div className="text-center">
-          <p className="text-gray-700 font-medium">BABAYAGA - THE HIGH TABLE</p>
+        {/* ✅ User Info */}
+        <div className="text-center mt-1">
+          <p className="text-gray-800 font-semibold text-lg">
+            {username || "Guest"}
+          </p>
+          <p className="text-gray-500 text-sm">
+            {role || "-"}
+          </p>
         </div>
 
         <span className="h-[1.5px] bg-[#dfe0e4] w-full block my-3"></span>
