@@ -45,7 +45,7 @@ export default function CreateOvertimePage() {
 
     const timeToSeconds = (time) => {
         const [h, m, s] = time.split(":").map(Number)
-        return h * 3600 + m * 60 + (s || 0)
+        return (h || 0) * 3600 + (m || 0) * 60 + (s || 0)
     }
 
     useEffect(() => {
@@ -59,8 +59,10 @@ export default function CreateOvertimePage() {
 
             setMemberData((prev) => ({
                 ...prev,
-                overtime_output: formatTime(diffSec),
+                overtime_output: formatTime(Math.floor(diffSec)),
             }))
+        } else {
+            setMemberData((prev) => ({ ...prev, overtime_output: "00:00:00" }))
         }
     }, [memberData.start, memberData.end, memberData.time_rest, formData.time_rest])
 
@@ -123,21 +125,21 @@ export default function CreateOvertimePage() {
                 <div className="bg-white rounded-2xl shadow-lg w-full max-w-3xl px-8 py-10 relative">
                     {/* header */}
                     <div className="flex items-center justify-between mb-6">
-                        <h1 className="text-2xl font-bold text-gray-800">Create Overtime</h1>
+                        <h1 className="text-2xl font-bold text-gray-800">create overtime</h1>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => router.back()}
                                 className="flex items-center gap-2 bg-white text-blue-700 font-medium py-2 px-4 rounded-lg shadow-sm border border-blue-700 hover:bg-blue-700 hover:text-white transition-all"
                             >
                                 <ChevronLeft size={18} />
-                                Back
+                                back
                             </button>
                             <button
                                 onClick={handleSubmit}
                                 className="flex items-center gap-2 bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm hover:bg-blue-800 transition-all"
                             >
                                 <Save size={18} />
-                                Save
+                                save
                             </button>
                         </div>
                     </div>
@@ -145,7 +147,7 @@ export default function CreateOvertimePage() {
                     {/* form utama */}
                     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Timestamps</label>
+                            <label className="block text-sm font-medium mb-1">timestamps</label>
                             <input
                                 type="datetime-local"
                                 name="timestamp"
@@ -155,19 +157,29 @@ export default function CreateOvertimePage() {
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-1">ID *</label>
-                            <input
-                                type="text"
-                                name="id"
-                                value={formData.id}
-                                readOnly
-                                className="w-full border rounded-lg p-2.5 bg-gray-100 text-gray-600"
-                            />
+                        <div className="grid grid-cols-12 gap-4">
+                            <div className="col-span-6">
+                                <label className="block text-sm font-medium mb-1">id *</label>
+                                <input
+                                    type="text"
+                                    name="id"
+                                    value={formData.id}
+                                    readOnly
+                                    className="w-full border rounded-lg p-2.5 bg-gray-100 text-gray-600"
+                                />
+                            </div>
+
+                            <div className="col-span-6 flex items-end">
+                                <div className="ml-auto text-sm">
+                                    <div className="inline-block bg-gray-100 px-3 py-1 rounded-full text-gray-700 font-medium">
+                                        id overtime: {formData.id}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">Departement</label>
+                            <label className="block text-sm font-medium mb-1">departement</label>
                             <input
                                 type="text"
                                 name="departement"
@@ -178,7 +190,7 @@ export default function CreateOvertimePage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">Date</label>
+                            <label className="block text-sm font-medium mb-1">date</label>
                             <input
                                 type="date"
                                 name="date"
@@ -189,7 +201,7 @@ export default function CreateOvertimePage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">Time Rest</label>
+                            <label className="block text-sm font-medium mb-1">time rest</label>
                             <input
                                 type="time"
                                 step="1"
@@ -207,7 +219,7 @@ export default function CreateOvertimePage() {
                                 className="w-full flex items-center justify-center gap-2 bg-gray-100 border text-blue-700 border-blue-700 font-medium py-2.5 rounded-lg hover:bg-blue-700 hover:text-white transition-all"
                             >
                                 <Users size={18} />
-                                Input Member Per Departement
+                                input member
                             </button>
                         </div>
                     </form>
@@ -215,31 +227,43 @@ export default function CreateOvertimePage() {
                     {/* tabel member sementara */}
                     {memberList.length > 0 && (
                         <div className="mt-8 border-t pt-4">
-                            <h3 className="text-lg font-semibold mb-2 text-gray-700">Member List</h3>
-                            <table className="w-full text-sm border">
-                                <thead className="bg-gray-100">
-                                    <tr>
-                                        <th className="border p-2">Nama</th>
-                                        <th className="border p-2">Start</th>
-                                        <th className="border p-2">End</th>
-                                        <th className="border p-2">Rest</th>
-                                        <th className="border p-2">Output</th>
-                                        <th className="border p-2">Note</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {memberList.map((m, i) => (
-                                        <tr key={i}>
-                                            <td className="border p-2">{m.nama}</td>
-                                            <td className="border p-2">{m.start}</td>
-                                            <td className="border p-2">{m.end}</td>
-                                            <td className="border p-2">{m.time_rest}</td>
-                                            <td className="border p-2">{m.overtime_output}</td>
-                                            <td className="border p-2">{m.note}</td>
+                            <h3 className="text-lg font-semibold mb-2 text-gray-700">member list</h3>
+
+                            {/* scrollable container */}
+                            <div className="overflow-x-auto rounded-lg border">
+                                <table className="min-w-[1000px] w-full text-sm border-collapse">
+                                    <thead className="bg-gray-100">
+                                        <tr>
+                                            <th className="border p-2">timestamps</th>
+                                            <th className="border p-2">id</th>
+                                            <th className="border p-2">id overtime</th>
+                                            <th className="border p-2">nama</th>
+                                            <th className="border p-2">nik</th>
+                                            <th className="border p-2">start</th>
+                                            <th className="border p-2">end</th>
+                                            <th className="border p-2">time rest</th>
+                                            <th className="border p-2">note</th>
+                                            <th className="border p-2">overtime output</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {memberList.map((m, i) => (
+                                            <tr key={i} className="hover:bg-gray-50">
+                                                <td className="border p-2 whitespace-nowrap">{m.timestamp}</td>
+                                                <td className="border p-2 whitespace-nowrap">{formData.id}</td>
+                                                <td className="border p-2 whitespace-nowrap">{m.overtime_id}</td>
+                                                <td className="border p-2 whitespace-nowrap">{m.nama}</td>
+                                                <td className="border p-2 whitespace-nowrap">{m.nik}</td>
+                                                <td className="border p-2 whitespace-nowrap">{m.start}</td>
+                                                <td className="border p-2 whitespace-nowrap">{m.end}</td>
+                                                <td className="border p-2 whitespace-nowrap">{m.time_rest}</td>
+                                                <td className="border p-2 whitespace-nowrap">{m.note}</td>
+                                                <td className="border p-2 whitespace-nowrap">{m.overtime_output}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
 
@@ -255,12 +279,12 @@ export default function CreateOvertimePage() {
                                 </button>
 
                                 <h2 className="text-lg font-semibold mb-4 text-gray-800 text-center">
-                                    Input Member
+                                    input member
                                 </h2>
 
                                 <form onSubmit={handleMemberSubmit} className="flex flex-col gap-3">
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">Timestamp</label>
+                                        <label className="block text-sm font-medium mb-1">timestamp</label>
                                         <input
                                             type="datetime-local"
                                             name="timestamp"
@@ -271,7 +295,7 @@ export default function CreateOvertimePage() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">Overtime ID</label>
+                                        <label className="block text-sm font-medium mb-1">overtime id</label>
                                         <input
                                             type="text"
                                             name="overtime_id"
@@ -282,21 +306,35 @@ export default function CreateOvertimePage() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">Nama</label>
+                                        <label className="block text-sm font-medium mb-1">nama</label>
                                         <input
                                             type="text"
                                             name="nama"
                                             value={memberData.nama}
                                             onChange={handleMemberChange}
                                             required
-                                            placeholder="Masukan nama"
+                                            placeholder="masukan nama"
+                                            className="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-400 outline-none"
+                                        />
+                                    </div>
+
+                                    {/* kolom nik baru */}
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">nik</label>
+                                        <input
+                                            type="text"
+                                            name="nik"
+                                            value={memberData.nik || ""}
+                                            onChange={handleMemberChange}
+                                            required
+                                            placeholder="masukan nik"
                                             className="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-400 outline-none"
                                         />
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">Start</label>
+                                            <label className="block text-sm font-medium mb-1">start</label>
                                             <input
                                                 type="datetime-local"
                                                 name="start"
@@ -308,7 +346,7 @@ export default function CreateOvertimePage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">End</label>
+                                            <label className="block text-sm font-medium mb-1">end</label>
                                             <input
                                                 type="datetime-local"
                                                 name="end"
@@ -321,7 +359,7 @@ export default function CreateOvertimePage() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">Note</label>
+                                        <label className="block text-sm font-medium mb-1">note</label>
                                         <input
                                             type="text"
                                             name="note"
@@ -333,7 +371,7 @@ export default function CreateOvertimePage() {
 
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">Time Rest</label>
+                                            <label className="block text-sm font-medium mb-1">time rest</label>
                                             <input
                                                 type="time"
                                                 step="1"
@@ -345,7 +383,7 @@ export default function CreateOvertimePage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">Overtime Output</label>
+                                            <label className="block text-sm font-medium mb-1">overtime output</label>
                                             <input
                                                 type="text"
                                                 name="overtime_output"
@@ -362,13 +400,13 @@ export default function CreateOvertimePage() {
                                             onClick={() => setShowMemberForm(false)}
                                             className="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100"
                                         >
-                                            Batal
+                                            batal
                                         </button>
                                         <button
                                             type="submit"
                                             className="px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800"
                                         >
-                                            Simpan
+                                            simpan
                                         </button>
                                     </div>
                                 </form>
