@@ -1,13 +1,16 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import Sidebar from "@/components/ui/sidebar"
-import { ChevronLeft, Save } from "lucide-react"
 import Swal from "sweetalert2"
+import { ChevronLeft, Save } from "lucide-react"
 
-export default function CreateMemberGASPage() {
+export default function EditMemberGASPage() {
   const router = useRouter()
+  const params = useParams()
+  const { member_id } = params
+
   const [formData, setFormData] = useState({
     member_id: "",
     nik: "",
@@ -18,40 +21,69 @@ export default function CreateMemberGASPage() {
     phone_number: ""
   })
 
-  // Function generate 9 digit alfanumerik
-  const generateID = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    let id = ""
-    for (let i = 0; i < 9; i++) {
-      id += chars.charAt(Math.floor(Math.random() * chars.length))
-    }
-    return id
-  }
-
+  // Ambil data member by ID
   useEffect(() => {
-    setFormData((prev) => ({ ...prev, member_id: generateID() }))
-  }, [])
+    if (!member_id) return
+
+    const fetchMember = async () => {
+      try {
+        const res = await fetch(`/api/member/${member_id}`)
+        const data = await res.json()
+
+        if (!data.success) throw new Error(data.message)
+
+        const member = data.data
+        setFormData({
+          member_id: member.member_id || "",
+          nik: member.nik || "",
+          name: member.name || "",
+          department: member.department || "",
+          section: member.section || "",
+          position: member.position || "",
+          phone_number: member.phone_number || ""
+        })
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal ambil data member!",
+          text: err.message,
+          toast: true,
+          position: "top",
+          showConfirmButton: false,
+          timer: 2000,
+          background: "#fee2e2",
+          color: "#b91c1c",
+          width: "380px",
+          customClass: { popup: "rounded-xl py-1 text-sm" },
+        })
+        router.push("/pages/member-gas")
+      }
+    }
+
+    fetchMember()
+  }, [member_id])
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData({ ...formData, [name]: value })
   }
 
-  const handleSubmit = async (e) => {
+  // Update member
+  const handleSave = async (e) => {
     e.preventDefault()
-
     try {
-      const res = await fetch("/api/member", {
-        method: "POST",
+      const res = await fetch(`/api/member/${member_id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       })
 
-      if (!res.ok) throw new Error("Gagal menyimpan data")
+      const data = await res.json()
+      if (!data.success) throw new Error(data.message)
 
       Swal.fire({
         icon: "success",
-        title: "Data member berhasil dibuat!",
+        title: "Data berhasil diupdate!",
         toast: true,
         position: "top",
         showConfirmButton: false,
@@ -66,7 +98,8 @@ export default function CreateMemberGASPage() {
     } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "Gagal membuat data!",
+        title: "Gagal update!",
+        text: err.message,
         toast: true,
         position: "top",
         showConfirmButton: false,
@@ -86,7 +119,7 @@ export default function CreateMemberGASPage() {
         <div className="bg-white rounded-2xl shadow-lg w-full max-w-5xl px-8 py-8 flex flex-col min-h-[500px]">
           {/* Header */}
           <div className="flex items-center justify-between mb-4 mt-8">
-            <h1 className="text-3xl font-bold text-gray-800">Create Member</h1>
+            <h1 className="text-3xl font-bold text-gray-800">Edit Member</h1>
 
             <div className="flex items-center gap-3">
               <button
@@ -98,28 +131,30 @@ export default function CreateMemberGASPage() {
               </button>
 
               <button
-                onClick={handleSubmit}
+                onClick={handleSave}
                 className="flex items-center gap-2 bg-white text-blue-700 font-medium py-2 px-4 rounded-lg shadow-sm border border-blue-700 hover:bg-[#066dca] hover:text-white hover:shadow-md transition-all duration-300 cursor-pointer"
               >
                 <Save size={18} />
-                <span>Save</span>
+                <span>Update</span>
               </button>
             </div>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="mt-6 w-full">
-            <div className="flex flex-col flex-1">
-              <label className="text-sm font-medium mb-1">Member ID</label>
-              <div
-                className="h-[42px] px-3 mb-5 border border-gray-300 rounded-lg text-sm bg-white shadow-sm flex items-center text-gray-700 select-none cursor-not-allowed truncate"
-                style={{ width: "105px" }}
-              >
-                {formData.member_id}
-              </div>
+          <form onSubmit={handleSave} className="mt-6 w-full">
+            {/* Member ID di atas sendiri */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-1">Member ID</label>
+              <input
+                type="text"
+                name="member_id"
+                value={formData.member_id}
+                readOnly
+                className="rounded-lg p-2.5 bg-gray-100 text-gray-600 select-none cursor-not-allowed w-[14ch]"
+              />
             </div>
 
-            {/* 6 input dibagi jadi 2 baris × 3 kolom select-none cursor-not-allowed */}
+            {/* 6 input dibagi jadi 2 baris × 3 kolom */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
               <div>
                 <label className="block text-sm font-medium mb-1">NIK</label>
