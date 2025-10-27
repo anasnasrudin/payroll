@@ -7,7 +7,15 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url)
     const role = (searchParams.get("role") || "").toLowerCase() // HEAD / HR / GM / ADMIN
 
-    let query = "SELECT * FROM tb_overtime"
+    let query = `
+      SELECT * FROM tb_overtime
+      WHERE NOT EXISTS (
+        SELECT 1 FROM tb_approval a
+        WHERE a.overtime_id = tb_overtime.overtime_id
+        AND a.status = 'rejected'
+      )
+    `
+
     const params = []
 
     if (role && role !== "admin") {

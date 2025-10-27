@@ -73,7 +73,7 @@ export default function LoginPage() {
         // ✅ Redirect sesuai role tanpa dashboard
         let targetPath = "/pages/overtime"
         if (user.role === "Admin") targetPath = "/pages/overtime"
-        else if (user.role === "Head") targetPath = "/pages/approval"
+        else if (user.role === "HEAD") targetPath = "/pages/approval"
         else if (user.role === "HR") targetPath = "/pages/member-gas"
         else if (user.role === "GM") targetPath = "/pages/approval"
         else if (user.role === "Superuser") targetPath = "/pages/overtime"
